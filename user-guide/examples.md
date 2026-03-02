@@ -12,7 +12,7 @@ Complete programs demonstrating wirelog features. Each example can be saved as a
 
 Find all nodes reachable from a source node.
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl source(x: int32)
 .decl reach(x: int32)
@@ -31,7 +31,7 @@ reach(y) :- reach(x), edge(x, y).
 
 Output:
 
-```
+```dl
 reach(1)
 reach(2)
 reach(3)
@@ -44,7 +44,7 @@ reach(6)
 
 Compute all pairs (x, z) where z is reachable from x.
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl tc(x: int32, y: int32)
 
@@ -58,7 +58,7 @@ tc(x, z) :- tc(x, y), edge(y, z).
 
 Output:
 
-```
+```dl
 tc(1, 2)
 tc(1, 3)
 tc(1, 4)
@@ -71,7 +71,7 @@ tc(3, 4)
 
 Find pairs of nodes at the same depth from shared parents.
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl sg(x: int32, y: int32)
 
@@ -90,7 +90,7 @@ Output includes pairs like `sg(2, 3)` and `sg(4, 5)`.
 
 Find shortest distances from node 1 in a weighted graph.
 
-```
+```dl
 .decl edge(x: int32, y: int32, w: int32)
 .decl dist(x: int32, d: int32)
 
@@ -105,7 +105,7 @@ dist(y, min(d + w)) :- dist(x, d), edge(x, y, w).
 
 Output:
 
-```
+```dl
 dist(1, 0)
 dist(2, 5)
 dist(3, 8)
@@ -116,7 +116,7 @@ dist(4, 10)
 
 Label each node with the minimum node ID in its connected component.
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl cc(x: int32, c: int32)
 
@@ -131,7 +131,7 @@ cc(y, min(c)) :- cc(x, c), edge(x, y).
 
 Output:
 
-```
+```dl
 cc(1, 1)
 cc(2, 1)
 cc(3, 1)
@@ -143,7 +143,7 @@ cc(5, 4)
 
 Color a graph with two colors. If any node gets both colors, the graph is not bipartite.
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl blue(x: int32)
 .decl red(x: int32)
@@ -166,7 +166,7 @@ This graph is bipartite (no node is both blue and red). Add `edge(1, 3)` to crea
 
 A simplified points-to analysis for programs.
 
-```
+```dl
 .decl addressOf(v: int32, o: int32)
 .decl assign(v1: int32, v2: int32)
 .decl load(v1: int32, v2: int32)
@@ -193,7 +193,7 @@ Load data from external files instead of inline facts.
 
 **program.dl:**
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .input edge(filename="edges.csv", delimiter=",")
 
@@ -222,7 +222,7 @@ wirelog-cli program.dl
 
 Count the number of outgoing edges per node.
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl out_degree(x: int32, c: int32)
 
@@ -236,7 +236,7 @@ out_degree(x, count(y)) :- edge(x, y).
 
 Output:
 
-```
+```dl
 out_degree(1, 3)
 out_degree(2, 1)
 ```
@@ -245,7 +245,7 @@ out_degree(2, 1)
 
 Find nodes with no outgoing edges.
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl node(x: int32)
 .decl sink(x: int32)
@@ -261,7 +261,7 @@ sink(x) :- node(x), !edge(x, _).
 
 Output:
 
-```
+```dl
 sink(3)
 ```
 
@@ -269,7 +269,7 @@ sink(3)
 
 wirelog handles string values via interning.
 
-```
+```dl
 .decl knows(x: string, y: string)
 .decl chain(x: string, y: string)
 
@@ -285,7 +285,7 @@ chain(x, z) :- chain(x, y), knows(y, z).
 
 Output:
 
-```
+```dl
 chain("Alice", "Bob")
 chain("Alice", "Carol")
 chain("Alice", "Dave")

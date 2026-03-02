@@ -12,7 +12,7 @@ This guide walks you through wirelog from your first Datalog program to recursio
 
 A Datalog program consists of **declarations**, **facts** (ground data), and **rules** (logical derivations). Every relation must be declared with `.decl` before use.
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl result(x: int32, y: int32)
 
@@ -32,7 +32,7 @@ wirelog-cli first.dl
 
 Output:
 
-```
+```dl
 result(1, 2)
 result(2, 3)
 ```
@@ -43,7 +43,7 @@ Facts state what is true. Rules derive new facts from existing ones. The `:-` sy
 
 When multiple predicates share a variable, wirelog joins them on that variable.
 
-```
+```dl
 .decl parent(x: int32, y: int32)
 .decl name(x: int32, n: string)
 .decl child_name(n: string)
@@ -60,7 +60,7 @@ child_name(n) :- parent(p, c), name(c, n).
 
 Output:
 
-```
+```dl
 child_name("Bob")
 child_name("Carol")
 ```
@@ -71,7 +71,7 @@ The shared variable `c` forces wirelog to match `parent(p, c)` with `name(c, n)`
 
 Comparison operators filter results.
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl backward(x: int32, y: int32)
 
@@ -85,7 +85,7 @@ backward(x, y) :- edge(x, y), x > y.
 
 Output:
 
-```
+```dl
 backward(3, 1)
 ```
 
@@ -95,7 +95,7 @@ Available operators: `=`, `!=`, `<`, `>`, `<=`, `>=`.
 
 Datalog's power comes from recursive rules. This computes **transitive closure** -- all paths in a graph:
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl tc(x: int32, y: int32)
 
@@ -112,7 +112,7 @@ tc(x, z) :- tc(x, y), edge(y, z).
 
 Output:
 
-```
+```dl
 tc(1, 2)
 tc(1, 3)
 tc(1, 4)
@@ -127,7 +127,7 @@ wirelog automatically computes the fixed point -- it keeps applying rules until 
 
 Use `!` to negate a predicate. This finds nodes with no outgoing edges:
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl node(x: int32)
 .decl sink(x: int32)
@@ -144,7 +144,7 @@ sink(x) :- node(x), !edge(x, _).
 
 Output:
 
-```
+```dl
 sink(3)
 ```
 
@@ -163,7 +163,7 @@ Aggregate functions compute summary values: `count`, `sum`, `min`, `max`.
 
 ### Count
 
-```
+```dl
 .decl data(x: int32, y: int32)
 .decl cnt(x: int32, c: int32)
 
@@ -178,14 +178,14 @@ cnt(x, count(y)) :- data(x, y).
 
 Output:
 
-```
+```dl
 cnt(1, 3)
 cnt(2, 1)
 ```
 
 ### Min (Shortest Path)
 
-```
+```dl
 .decl edge(x: int32, y: int32, w: int32)
 .decl dist(x: int32, d: int32)
 
@@ -199,7 +199,7 @@ dist(y, min(d + w)) :- dist(x, d), edge(x, y, w).
 
 Output:
 
-```
+```dl
 dist(1, 0)
 dist(2, 5)
 dist(3, 8)
@@ -211,7 +211,7 @@ Node 3 gets distance 8 (via 1→2→3: 5+3) rather than 10 (direct 1→3) becaus
 
 For larger datasets, load data from CSV files using the `.input` directive.
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .input edge(filename="edges.csv", delimiter=",")
 
@@ -250,7 +250,7 @@ The `.output tc` directive means only `tc` results are printed. Without `.output
 
 wirelog supports string values via interning:
 
-```
+```dl
 .decl edge(x: string, y: string)
 .decl tc(x: string, y: string)
 
@@ -263,7 +263,7 @@ tc(x, z) :- tc(x, y), edge(y, z).
 
 Output:
 
-```
+```dl
 tc("Alice", "Bob")
 tc("Alice", "Carol")
 tc("Bob", "Carol")
@@ -273,7 +273,7 @@ tc("Bob", "Carol")
 
 Use `_` to ignore a column:
 
-```
+```dl
 .decl edge(x: int32, y: int32, w: int32)
 .decl has_edge(x: int32, y: int32)
 

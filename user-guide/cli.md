@@ -43,7 +43,7 @@ A program can contain:
 
 The `.input` directive loads data from CSV files:
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .input edge(filename="edges.csv", delimiter=",")
 ```
@@ -70,7 +70,7 @@ Without `.output` directives, all derived relations are printed.
 
 With `.output`, only marked relations are printed:
 
-```
+```dl
 .output tc
 ```
 
@@ -78,13 +78,13 @@ With `.output`, only marked relations are printed:
 
 Results are printed to stdout as tuples:
 
-```
+```dl
 relation(value1, value2, ...)
 ```
 
 Integer values print as decimal numbers. String values print with double quotes:
 
-```
+```dl
 tc(1, 2)
 tc("Alice", "Bob")
 ```

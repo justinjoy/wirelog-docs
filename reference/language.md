@@ -58,13 +58,13 @@ Used in `.decl` declarations:
 
 Ground atoms with constant arguments, terminated by a period.
 
-```
+```dl
 relation(const1, const2, ...).
 ```
 
 Examples:
 
-```
+```dl
 edge(1, 2).
 name(1, "Alice").
 source(1).
@@ -74,13 +74,13 @@ source(1).
 
 A head atom derived from body predicates, separated by `:-`.
 
-```
+```dl
 head(args) :- pred1(args), pred2(args), ... .
 ```
 
 Body predicates are comma-separated (logical AND). Shared variables across predicates form implicit joins.
 
-```
+```dl
 tc(x, z) :- tc(x, y), edge(y, z).
 ```
 
@@ -111,7 +111,7 @@ All operators are left-associative. Parentheses are not supported in arithmetic 
 
 Used as body predicates:
 
-```
+```dl
 big(x, y) :- edge(x, y), x > 10.
 diff(x, y) :- data(x, y), x != y.
 ```
@@ -120,7 +120,7 @@ diff(x, y) :- data(x, y), x != y.
 
 Prefix `!` on a body predicate.
 
-```
+```dl
 sink(x) :- node(x), !edge(x, _).
 ```
 
@@ -141,7 +141,7 @@ Aggregate functions in head arguments. Grouping is implicit over non-aggregate h
 
 Functions are case-insensitive (`count` = `COUNT`).
 
-```
+```dl
 cnt(x, count(y)) :- data(x, y).
 shortest(x, min(d + w)) :- dist(x, d), edge(x, y, w).
 ```
@@ -150,13 +150,13 @@ shortest(x, min(d + w)) :- dist(x, d), edge(x, y, w).
 
 ### `.decl` -- Declare Relation
 
-```
+```dl
 .decl name(attr1: type1, attr2: type2, ...)
 ```
 
 Example:
 
-```
+```dl
 .decl edge(x: int32, y: int32)
 .decl label(id: int32, name: string)
 ```
@@ -165,7 +165,7 @@ Example:
 
 Must follow a `.decl` for the same relation.
 
-```
+```dl
 .input name(filename="path.csv", delimiter=",")
 ```
 
@@ -181,7 +181,7 @@ CSV format: one tuple per line, fields separated by delimiter, empty lines skipp
 
 ### `.output` -- Filter Output
 
-```
+```dl
 .output name
 ```
 
@@ -189,7 +189,7 @@ If any `.output` directive exists, only marked relations are printed. Without `.
 
 ### `.printsize` -- Print Cardinality
 
-```
+```dl
 .printsize name
 ```
 
@@ -197,7 +197,7 @@ If any `.output` directive exists, only marked relations are printed. Without `.
 
 Appended after a rule to signal the optimizer:
 
-```
+```dl
 path(x, z) :- edge(x, y), path(y, z). .plan
 ```
 
