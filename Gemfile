@@ -5,7 +5,6 @@ gem "jekyll-github-metadata", ">= 2.15"
 
 gem "jekyll-include-cache"
 gem "jekyll-sitemap"
-gem "jekyll-remote-theme"
 
 gem "jekyll-seo-tag"
 gem "jekyll-scholar"

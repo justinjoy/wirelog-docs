@@ -1,6 +1,6 @@
 title: wirelog
 description: Embedded-to-Enterprise Datalog Engine
-remote_theme: just-the-docs/just-the-docs
+theme: just-the-docs
 
 permalink:           pretty
 relative_permalinks: false
@@ -11,7 +11,6 @@ url: https://justinjoy.github.io
 baseurl: /wirelog
 
 plugins:
-   - jekyll-remote-theme
    - jekyll-seo-tag
    - jekyll-sitemap
    - jekyll-github-metadata
