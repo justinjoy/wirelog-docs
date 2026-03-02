@@ -51,3 +51,7 @@ defaults:
       path: ""
     values:
       layout: default 
+
+exclude:
+  - AGENTS.md
+  - CLAUDE.md

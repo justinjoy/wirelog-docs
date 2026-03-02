@@ -1,6 +1,7 @@
 ---
 title: CLI Usage
-nav_order: 5
+parent: User Guide
+nav_order: 2
 ---
 
 # CLI Usage

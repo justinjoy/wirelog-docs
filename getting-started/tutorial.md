@@ -1,5 +1,6 @@
 ---
 title: Tutorial
+parent: Getting Started
 nav_order: 2
 ---
 

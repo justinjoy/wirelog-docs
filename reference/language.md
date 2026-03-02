@@ -1,6 +1,7 @@
 ---
 title: Language Reference
-nav_order: 3
+parent: Reference
+nav_order: 1
 ---
 
 # Language Reference

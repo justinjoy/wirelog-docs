@@ -11,45 +11,30 @@ wirelog is a C11-based Datalog engine designed for embedded-to-enterprise deploy
 
 wirelog supports recursive queries, stratified negation, aggregation, and CSV data loading.
 
-## Quick Start
+## What is wirelog?
 
-```bash
-# Build (requires Meson + C11 compiler + Rust toolchain)
-meson setup builddir -Ddd=true
-meson compile -C builddir
+wirelog is a declarative logic programming engine that evaluates Datalog. It is built to bridge the gap between resource-constrained embedded environments and high-performance enterprise data processing.
 
-# Run a program
-./builddir/wirelog-cli program.dl
-```
+By separating the compilation frontend from the execution backend, wirelog can parse and optimize Datalog rules locally in a lightweight C11 core, while delegating the heavy lifting of execution to specialized backends like Differential Dataflow or Apache Arrow.
 
-**Hello World** -- transitive closure:
+### Why Datalog?
 
-```
-.decl edge(x: int32, y: int32)
-.decl tc(x: int32, y: int32)
-edge(1, 2). edge(2, 3). edge(3, 4).
-tc(x, y) :- edge(x, y).
-tc(x, z) :- tc(x, y), edge(y, z).
-```
+Datalog is a declarative logic programming language that is highly expressive for data queries and analysis. Unlike imperative languages or SQL, Datalog naturally supports recursion, making it exceptionally well-suited for querying graphs, trees, and complex hierarchical relationships without writing complex loops or self-joins.
 
-```
-$ wirelog-cli tc.dl
-tc(1, 2)
-tc(1, 3)
-tc(1, 4)
-tc(2, 3)
-tc(2, 4)
-tc(3, 4)
-```
+### Core Philosophy
+
+1. **Embedded First**: The core compiler is written in pure C11, making it trivial to embed wirelog into C/C++ applications or compile it to WebAssembly for the browser.
+2. **Pluggable Backends**: You construct your Datalog rules once, and wirelog targets the best execution engine for your environment, whether that's a locally vectorized backend or a distributed streaming engine.
+3. **Advanced Features**: Beyond standard Datalog, wirelog natively supports recursive queries, stratified negation to reason about the absence of paths or data, and powerful aggregations.
 
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
-| [Tutorial](tutorial) | Step-by-step guide from first program to advanced features |
-| [Language Reference](reference) | Grammar, types, operators, directives |
-| [Examples](examples) | Learning-oriented example programs |
-| [CLI Usage](cli) | Command-line interface reference |
+| [Tutorial](getting-started/tutorial) | Step-by-step guide from first program to advanced features |
+| [Language Reference](reference/language) | Grammar, types, operators, directives |
+| [Examples](user-guide/examples) | Learning-oriented example programs |
+| [CLI Usage](user-guide/cli) | Command-line interface reference |
 
 ## Links
 
