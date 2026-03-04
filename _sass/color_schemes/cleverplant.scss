@@ -42,3 +42,34 @@ $yellow: $vivid-green;
 $blue: $cyan-blue;
 $green: $vivid-green;
 $purple: $vivid-purple;
+
+// Table styling for better readability
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+
+  th {
+    background-color: $primary-color;
+    color: $dark-bg;
+    font-weight: 600;
+    padding: 0.75rem;
+    text-align: left;
+    border: 1px solid $primary-color;
+  }
+
+  td {
+    padding: 0.75rem;
+    border: 1px solid rgba(112, 169, 161, 0.3);
+    background-color: rgba(35, 59, 56, 0.5);
+    color: $text-main;
+  }
+
+  tr:nth-child(even) td {
+    background-color: rgba(26, 45, 43, 0.5);
+  }
+
+  tr:hover td {
+    background-color: rgba(112, 169, 161, 0.1);
+  }
+}
