@@ -1,0 +1,49 @@
+# Delta Query Example: Count Aggregation (Group Counts)
+#
+# Aggregations produce deltas as pairs:
+#   - the old aggregate value is retracted
+#   + the new aggregate value is inserted
+#
+# Files:
+#   - purchases.csv (mutable input facts)
+#
+# CLI (run from this directory):
+#   wirelog-cli group-counts.dl
+#   wirelog-cli group-counts.dl --delta purchase_count --watch purchases.csv
+#
+# Initial facts (purchases.csv):
+#   alice,apple
+#   alice,banana
+#   bob,carrot
+#   carol,dates
+#   carol,eggs
+#   carol,fig
+#
+# Snapshot output (wirelog-cli group-counts.dl):
+#   purchase_count("alice", 2)
+#   purchase_count("bob", 1)
+#   purchase_count("carol", 3)
+#
+# Step 1 (add a fact; expect deletion of old count):
+#   Add this line to purchases.csv:
+#     bob,donut
+#   Delta output (purchase_count):
+#     - purchase_count("bob", 1)
+#     + purchase_count("bob", 2)
+#
+# Step 2 (remove a fact; expect addition of new count):
+#   Remove this line from purchases.csv:
+#     alice,banana
+#   Delta output (purchase_count):
+#     - purchase_count("alice", 2)
+#     + purchase_count("alice", 1)
+
+.decl purchase(user: string, item: string)
+.decl purchase_count(user: string, n: int32)
+
+.input purchase(filename="purchases.csv", delimiter=",")
+
+purchase_count(u, count(i)) :- purchase(u, i).
+
+.output purchase_count
+

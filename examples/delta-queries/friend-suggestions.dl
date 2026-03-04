@@ -1,0 +1,46 @@
+# Delta Query Example: Friend Suggestions (friend-of-a-friend)
+#
+# This program derives `suggested(x, z)` when:
+#   - x is friends with y
+#   - y is friends with z
+#   - x is NOT already friends with z
+#
+# Files:
+#   - friends.csv (mutable input facts)
+#
+# CLI (run from this directory):
+#   wirelog-cli friend-suggestions.dl
+#   wirelog-cli friend-suggestions.dl --delta suggested --watch friends.csv
+#
+# Initial facts (friends.csv):
+#   Alice,Bob
+#   Bob,Carol
+#
+# Snapshot output (wirelog-cli friend-suggestions.dl):
+#   suggested("Alice", "Carol")
+#
+# Step 1 (add a fact; expect deletion):
+#   Add this line to friends.csv:
+#     Alice,Carol
+#   Delta output (suggested):
+#     - suggested("Alice", "Carol")
+#
+# Step 2 (remove a fact; expect addition):
+#   Remove the line:
+#     Alice,Carol
+#   Delta output (suggested):
+#     + suggested("Alice", "Carol")
+
+.decl friend(x: string, y: string)
+.decl suggested(x: string, y: string)
+
+.input friend(filename="friends.csv", delimiter=",")
+
+suggested(x, z) :-
+    friend(x, y),
+    friend(y, z),
+    x != z,
+    !friend(x, z).
+
+.output suggested
+

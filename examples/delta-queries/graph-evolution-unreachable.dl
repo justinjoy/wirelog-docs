@@ -1,0 +1,64 @@
+# Delta Query Example: Graph Evolution (Transitive Closure) via `unreach`
+#
+# `reach(x, y)` is the transitive closure of `edge`.
+#
+# The relation we delta-track is:
+#   unreach(y) := node y exists in the graph but is NOT reachable from source 1.
+#
+# This is useful for demonstrating "add -> delete" and "remove -> add" behavior:
+#   - Adding an edge can make a node reachable, deleting `unreach(y)`.
+#   - Removing an edge can break connectivity, adding `unreach(y)`.
+#
+# Files:
+#   - edges.csv (mutable input facts)
+#
+# CLI (run from this directory):
+#   wirelog-cli graph-evolution-unreachable.dl
+#   wirelog-cli graph-evolution-unreachable.dl --delta unreach --watch edges.csv
+#
+# Initial facts (edges.csv):
+#   1,2
+#   2,3
+#   4,5
+#
+# Snapshot output (wirelog-cli graph-evolution-unreachable.dl):
+#   reach(1, 2)
+#   reach(1, 3)
+#   reach(2, 3)
+#   reach(4, 5)
+#   unreach(4)
+#   unreach(5)
+#
+# Step 1 (add a fact; expect deletions):
+#   Add this line to edges.csv:
+#     3,4
+#   Delta output (unreach):
+#     - unreach(4)
+#     - unreach(5)
+#
+# Step 2 (remove a fact; expect additions):
+#   Remove this line from edges.csv:
+#     2,3
+#   Delta output (unreach):
+#     + unreach(3)
+#     + unreach(4)
+#     + unreach(5)
+
+.decl edge(x: int32, y: int32)
+.decl node(x: int32)
+.decl reach(x: int32, y: int32)
+.decl unreach(y: int32)
+
+.input edge(filename="edges.csv", delimiter=",")
+
+node(x) :- edge(x, _).
+node(y) :- edge(_, y).
+
+reach(x, y) :- edge(x, y).
+reach(x, z) :- reach(x, y), edge(y, z).
+
+unreach(y) :- node(y), y != 1, !reach(1, y).
+
+.output reach
+.output unreach
+

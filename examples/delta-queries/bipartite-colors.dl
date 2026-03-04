@@ -1,0 +1,61 @@
+# Delta Query Example: Bipartite Color Tracking
+#
+# Bipartite graph:
+#   user --link--> tag
+#
+# Tags have fixed base colors. A user's derived color is:
+#   - "red"  if linked to any red tag
+#   - "blue" if linked to any blue tag AND not linked to any red tag
+#
+# The `!has_red(u)` negation makes this non-monotonic:
+#   - Adding a red link deletes the previously-derived "blue" color.
+#   - Removing that red link adds the "blue" color back.
+#
+# Files:
+#   - links.csv (mutable input facts)
+#
+# CLI (run from this directory):
+#   wirelog-cli bipartite-colors.dl
+#   wirelog-cli bipartite-colors.dl --delta user_color --watch links.csv
+#
+# Initial facts (links.csv):
+#   alice,blue_tag
+#   bob,red_tag
+#
+# Snapshot output (wirelog-cli bipartite-colors.dl):
+#   user_color("alice", "blue")
+#   user_color("bob", "red")
+#
+# Step 1 (add a fact; expect deletion):
+#   Add this line to links.csv:
+#     alice,red_tag
+#   Delta output (user_color):
+#     - user_color("alice", "blue")
+#     + user_color("alice", "red")
+#
+# Step 2 (remove a fact; expect addition):
+#   Remove this line from links.csv:
+#     alice,red_tag
+#   Delta output (user_color):
+#     - user_color("alice", "red")
+#     + user_color("alice", "blue")
+
+.decl link(user: string, tag: string)
+.decl tag_color(tag: string, color: string)
+.decl has_red(user: string)
+.decl has_blue(user: string)
+.decl user_color(user: string, color: string)
+
+.input link(filename="links.csv", delimiter=",")
+
+tag_color("red_tag", "red").
+tag_color("blue_tag", "blue").
+
+has_red(u) :- link(u, t), tag_color(t, "red").
+has_blue(u) :- link(u, t), tag_color(t, "blue").
+
+user_color(u, "red") :- has_red(u).
+user_color(u, "blue") :- has_blue(u), !has_red(u).
+
+.output user_color
+

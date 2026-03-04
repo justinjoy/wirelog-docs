@@ -9,3 +9,4 @@ has_children: true
 Comprehensive documentation for wirelog Datalog.
 
 - [Language Reference](language): Grammar, types, built-in operators, and pragmatic directives
+- [Delta Queries](delta-queries): Incremental change tracking — additions and retractions on derived relations

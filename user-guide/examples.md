@@ -293,3 +293,88 @@ chain("Bob", "Carol")
 chain("Bob", "Dave")
 chain("Carol", "Dave")
 ```
+
+## Incremental Updates (Delta Queries)
+
+Delta queries let wirelog track **what changed** between evaluation steps rather than recomputing everything from scratch. When facts are added or removed, wirelog emits the derived tuples that were newly inserted (`+`) or retracted (`-`).
+
+For full reference, see [Delta Queries](/reference/delta-queries).
+
+### Before/After Example
+
+Consider a reachability program where we add a new edge and want to see only the newly derived facts:
+
+**Initial state** — edges `(1,2)`, `(2,3)`, `(3,4)`:
+
+```dl
+.decl edge(x: int32, y: int32)
+.decl reach(x: int32, y: int32)
+
+edge(1, 2).
+edge(2, 3).
+edge(3, 4).
+
+reach(x, y) :- edge(x, y).
+reach(x, z) :- reach(x, y), edge(y, z).
+
+.output reach
+```
+
+Output:
+
+```dl
+reach(1, 2)
+reach(1, 3)
+reach(1, 4)
+reach(2, 3)
+reach(2, 4)
+reach(3, 4)
+```
+
+**After adding** `edge(4, 5)` — delta output shows only the newly derived tuples:
+
+```dl
++ reach(1, 5)
++ reach(2, 5)
++ reach(3, 5)
++ reach(4, 5)
+```
+
+**After removing** `edge(2, 3)` — delta output shows the retracted tuples:
+
+```dl
+- reach(1, 3)
+- reach(1, 4)
+- reach(2, 3)
+- reach(2, 4)
+```
+
+### Interpreting Delta Output
+
+| Prefix | Meaning |
+|--------|---------|
+| `+`    | Tuple was newly derived in this step |
+| `-`    | Tuple was retracted (no longer holds) |
+| *(none)* | Fact was already present and unchanged |
+
+### CLI Commands for Delta Tracking
+
+Run a program and emit delta output for a relation:
+
+```bash
+wirelog-cli program.dl --delta reach
+```
+
+Watch a live data source and stream deltas as facts change:
+
+```bash
+wirelog-cli program.dl --delta reach --watch edges.csv
+```
+
+Pipe delta output to another tool:
+
+```bash
+wirelog-cli program.dl --delta reach | grep '^+' | awk '{print $2}'
+```
+
+See [Delta Queries](/reference/delta-queries) for the full directive syntax and advanced incremental computation patterns.
