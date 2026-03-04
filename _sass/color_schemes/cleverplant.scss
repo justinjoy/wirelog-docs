@@ -73,3 +73,90 @@ table {
     background-color: rgba(112, 169, 161, 0.1);
   }
 }
+
+// Datalog Syntax Highlighting
+.highlight {
+  background-color: rgba(26, 45, 43, 0.8);
+  border-left: 4px solid $primary-color;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+
+  code {
+    color: $text-main;
+  }
+
+  // Keywords and Directives (.decl, .input, .output, etc.)
+  .k, .kd, .kn {
+    color: $cyan-blue;
+    font-weight: 600;
+  }
+
+  // Strings
+  .s, .sa, .sb, .sc, .sd, .s1, .s2 {
+    color: $vivid-green;
+  }
+
+  .se {
+    color: $vivid-purple;
+    font-weight: 500;
+  }
+
+  // Numbers
+  .m, .mb, .mf, .mh, .mi, .mo, .il {
+    color: $cyan-blue;
+    font-weight: 500;
+  }
+
+  // Variables
+  .nv, .nl {
+    color: $vivid-green;
+    font-weight: 500;
+  }
+
+  // Functions / Relations
+  .nf, .na {
+    color: $primary-color;
+  }
+
+  // Operators
+  .o, .ow {
+    color: $vivid-purple;
+    font-weight: 600;
+  }
+
+  // Punctuation
+  .p, .pi {
+    color: $text-main;
+  }
+
+  // Comments
+  .c, .ca, .cm, .cp, .c1 {
+    color: #888888;
+    font-style: italic;
+  }
+
+  // Text
+  .w {
+    color: $text-main;
+  }
+
+  // Line numbers
+  .lineno {
+    color: #666666;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 0 0.5rem;
+    margin-right: 0.5rem;
+    border-right: 1px solid $primary-color;
+  }
+}
+
+// Inline code for Datalog
+code.language-datalog,
+code.language-dl {
+  background-color: rgba(112, 169, 161, 0.1);
+  color: $vivid-green;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+}
