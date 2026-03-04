@@ -1,6 +1,7 @@
 title: wirelog
 description: Embedded-to-Enterprise Datalog Engine
 theme: just-the-docs
+color_scheme: cleverplant
 
 permalink:           pretty
 relative_permalinks: false

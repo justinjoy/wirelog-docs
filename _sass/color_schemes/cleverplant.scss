@@ -1,0 +1,44 @@
+// CleverPlant Brand Color Scheme
+// Modern dark theme with muted teal and nature-inspired accents
+
+// Primary Colors
+$primary-color: #70A9A1 !default; // Muted teal/sage green
+$dark-bg: #1a2d2b !default; // Deep forest green
+$text-main: #f3f4f4 !default; // Off-white
+
+// Secondary & Accent Colors
+$card-bg: #233b38 !default; // Dark teal
+$cyan-blue: #0693e3 !default; // Bright cyan
+$vivid-green: #00d084 !default; // Vivid green cyan
+$vivid-purple: #9b51e0 !default; // Vivid purple
+
+// Neutral Palette
+$neutral-black: #000000 !default;
+$neutral-white: #ffffff !default;
+$neutral-gray: #abb8c3 !default;
+
+// Just the Docs overrides
+$body-background-color: $dark-bg;
+$sidebar-background-color: $card-bg;
+$code-background-color: rgba(0, 0, 0, 0.3);
+$code-foreground-color: $vivid-green;
+
+$body-text-color: $text-main;
+$body-heading-color: $primary-color;
+$link-color: $cyan-blue;
+$link-hover-color: $vivid-green;
+$btn-primary-color: $primary-color;
+$border-color: rgba(112, 169, 161, 0.2);
+
+// Search
+$search-background-color: $card-bg;
+$search-result-preview-color: $neutral-gray;
+
+// Syntax highlighting
+$repo-color: $vivid-purple;
+$base-color: $text-main;
+$red: $vivid-purple;
+$yellow: $vivid-green;
+$blue: $cyan-blue;
+$green: $vivid-green;
+$purple: $vivid-purple;
