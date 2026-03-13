@@ -8,7 +8,7 @@ nav_order: 2
 
 Delta queries expose the **incremental changes** to derived Datalog relations — which tuples were added or removed — without recomputing results from scratch. Instead of returning a full snapshot, a delta query emits only what changed between two evaluation states.
 
-wirelog is built on [Differential Dataflow](https://github.com/TimelyDataflow/differential-dataflow), which tracks changes natively as `(data, time, diff)` triples. Delta queries surface this internal machinery as a first-class feature.
+wirelog's columnar backend natively tracks changes as `(data, time, diff)` triples, enabling efficient delta query processing. Unlike traditional SQL systems, this change tracking is fundamental to wirelog's architecture.
 
 ## How Delta Queries Work
 
@@ -29,8 +29,8 @@ Both wirelog and RDFox support incremental Datalog over changing data, but they 
 
 | Feature | wirelog | RDFox |
 |---------|---------|-------|
-| Delta mechanism | C callback (`wl_dd_session_set_delta_cb`) + CLI flag | `deltaquery` command + SPARQL extensions |
-| Change input | CLI: `--delta` + `--watch`; API: direct fact retraction/insertion | REST API or shell commands (`import`, `delete`) |
+| Delta mechanism | C callback (`wl_session_set_delta_cb`) + embedding API | `deltaquery` command + SPARQL extensions |
+| Change input | API: `wl_session_insert_incremental()`, direct fact retraction/insertion | REST API or shell commands (`import`, `delete`) |
 | Output format | `+`/`-` prefixed tuples to stdout or callback | SPARQL result sets with polarity annotations |
 | Recursion support | Non-recursive rules (MVP) | Full recursive delta support |
 | Aggregation deltas | Supported (non-recursive) | Supported |
@@ -43,41 +43,19 @@ RDFox exposes delta queries through its shell command:
 deltaquery SELECT ?x ?y WHERE { ?x :knows ?y }
 ```
 
-wirelog exposes them through the `--delta` CLI flag and the `wl_dd_session_set_delta_cb` callback in the embedding API.
+wirelog exposes them through the `wl_session_set_delta_cb` callback in the embedding API.
 
-## CLI Usage
+## Using Delta Queries
 
-Run a program and emit delta output for one or more relations:
-
-```bash
-wirelog-cli program.dl --delta reach
-```
-
-Watch a CSV file for changes and stream deltas as facts update:
-
-```bash
-wirelog-cli program.dl --delta reach --watch edges.csv
-```
-
-Emit deltas for multiple relations:
-
-```bash
-wirelog-cli program.dl --delta reach --delta summary
-```
-
-Pipe delta additions to another tool:
-
-```bash
-wirelog-cli program.dl --delta reach | grep '^+' | awk '{print $2}'
-```
+Delta queries are available through the **embedded C API**. The `--delta` and `--watch` flags are not supported in the CLI; use `wl_session_set_delta_cb()` and `wl_session_insert_incremental()` instead.
 
 ### Delta output format
 
-Each changed tuple is prefixed with `+` or `-`:
+Each changed tuple is represented as a signed change:
 
 ```
-+ relation(val1, val2)
-- relation(val1, val2)
++ relation(val1, val2)   -- tuple newly derived
+- relation(val1, val2)   -- tuple retracted
 ```
 
 Unchanged tuples are not emitted. If no changes occurred for a given relation in a step, no output is produced for that relation.
@@ -115,11 +93,7 @@ suggested("Alice", "Carol")
 suggested("Bob", "Dave")
 ```
 
-Run with delta mode:
-
-```bash
-wirelog-cli friend-suggestions.dl --delta suggested
-```
+With the embedding API, register a delta callback for `suggested` before running. After the initial run, insert `friend("Alice", "Dave")` incrementally:
 
 **After adding** `friend("Alice", "Dave").` — Alice and Dave now have a mutual friend (Bob and Carol):
 
@@ -161,7 +135,7 @@ reach(x, z) :- reach(x, y), edge(y, z).
 ```
 
 {: .warning }
-`reach` is recursive. In the MVP, delta output is supported only for **non-recursive** output relations. To track reachability deltas, add a non-recursive summary relation and apply `--delta` to it instead (see below).
+`reach` is recursive. In the MVP, delta output is supported only for **non-recursive** output relations. To track reachability deltas, add a non-recursive summary relation and register the delta callback on it instead (see below).
 
 **Workaround — snapshot summary relation:**
 
@@ -182,9 +156,7 @@ reach_count(count(x)) :- reach(x, _).
 .output reach_count
 ```
 
-```bash
-wirelog-cli reachability.dl --delta reach_count
-```
+Register a delta callback on `reach_count` via the embedding API before running.
 
 **Snapshot output:**
 
@@ -232,11 +204,7 @@ high_degree(x) :- out_degree(x, d), d >= 2.
 .output high_degree
 ```
 
-Run with delta tracking on both relations:
-
-```bash
-wirelog-cli degree-monitor.dl --delta out_degree --delta high_degree
-```
+Register delta callbacks on `out_degree` and `high_degree` via the embedding API before running.
 
 **Snapshot output:**
 
@@ -289,9 +257,7 @@ can(u, a) :- role(u, r), permission(r, a).
 .output can
 ```
 
-```bash
-wirelog-cli access-control.dl --delta can
-```
+Register a delta callback on `can` via the embedding API before running.
 
 **Snapshot output:**
 
@@ -322,7 +288,7 @@ This pattern is useful for audit logs: the delta stream records exactly which pe
 
 When embedding wirelog as a library (`libwirelog`), register a callback to receive delta changes programmatically instead of reading stdout.
 
-### `wl_dd_session_set_delta_cb`
+### `wl_session_set_delta_cb`
 
 ```c
 typedef void (*wl_delta_cb)(
@@ -333,8 +299,8 @@ typedef void (*wl_delta_cb)(
     void          *userdata    /* opaque pointer passed at registration */
 );
 
-int wl_dd_session_set_delta_cb(
-    wl_dd_session *session,    /* active session handle           */
+int wl_session_set_delta_cb(
+    wl_session    *session,    /* active session handle           */
     const char    *relation,   /* relation to watch (NULL = all)  */
     wl_delta_cb    cb,         /* callback function               */
     void          *userdata    /* passed through to cb unchanged  */
@@ -345,7 +311,7 @@ int wl_dd_session_set_delta_cb(
 
 | Parameter | Description |
 |-----------|-------------|
-| `session` | Active `wl_dd_session` created by `wl_dd_session_create` |
+| `session` | Active `wl_session` created by `wl_session_create` |
 | `relation` | Relation name to monitor; pass `NULL` to receive deltas for all output relations |
 | `cb` | Callback invoked once per changed tuple per evaluation step |
 | `userdata` | Arbitrary pointer forwarded to every `cb` invocation |
@@ -379,7 +345,7 @@ String pointers are owned by the wirelog symbol table and remain valid for the l
 ### Minimal Embedding Example
 
 ```c
-#include <wirelog/dd.h>
+#include <wirelog/session.h>
 #include <stdio.h>
 
 static void on_delta(const char *rel, const wl_val *tuple,
@@ -396,10 +362,10 @@ static void on_delta(const char *rel, const wl_val *tuple,
 }
 
 int main(void) {
-    wl_dd_session *s = wl_dd_session_create("program.dl", /*workers=*/1);
-    wl_dd_session_set_delta_cb(s, "can", on_delta, NULL);
-    wl_dd_session_run(s);
-    wl_dd_session_destroy(s);
+    wl_session *s = wl_session_create("program.dl", /*workers=*/1);
+    wl_session_set_delta_cb(s, "can", on_delta, NULL);
+    wl_session_run(s);
+    wl_session_destroy(s);
     return 0;
 }
 ```
@@ -426,7 +392,7 @@ When an aggregate value changes, wirelog retracts the old value and inserts the 
 In the embedding API, always branch on `polarity` before inserting into a downstream store. Applying a retraction as an insertion will corrupt the result.
 
 **Register callbacks before running.**
-`wl_dd_session_set_delta_cb` must be called before `wl_dd_session_run`. Callbacks registered after execution starts will not receive deltas from previous steps.
+`wl_session_set_delta_cb` must be called before `wl_session_run`. Callbacks registered after execution starts will not receive deltas from previous steps.
 
 **Prefer relation-scoped callbacks over `NULL` (catch-all).**
 A catch-all callback (`relation = NULL`) receives deltas for every output relation and can produce unexpected volume for programs with many derived relations.

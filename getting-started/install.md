@@ -6,13 +6,12 @@ nav_order: 1
 
 # Build and Install Guide
 
-wirelog is designed to be lightweight and portable, but building the current version requires a few standard tools as it binds a C11 frontend to a Rust execution backend. 
+wirelog is designed to be lightweight and portable. Building requires only standard C tooling — no external runtimes or language toolchains.
 
 ## Prerequisites
 
 Before building wirelog, you need the following tools installed on your system:
 - **C11 Compiler**: `gcc` or `clang`
-- **Rust Toolchain**: `cargo` and `rustc`
 - **Build System**: `meson` (>= 0.60.0) and `ninja`
 
 Depending on your operating system, follow the specific commands below.
@@ -28,9 +27,6 @@ sudo apt-get install -y build-essential python3-pip ninja-build
 
 # Install Meson via pip (to get a recent version)
 pip3 install --user meson
-
-# Install Rust toolchain
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 ### macOS
@@ -40,9 +36,6 @@ Using [Homebrew](https://brew.sh/):
 ```bash
 # Install Meson, Ninja
 brew install meson ninja
-
-# Install Rust toolchain
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 *Note: macOS typically comes with clang pre-installed via Xcode Command Line Tools. If not, run `xcode-select --install`.*
 
@@ -62,9 +55,6 @@ pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-ninja python3-pip
 
 # Install Meson
 pip3 install meson
-
-# Install Rust toolchain (choose the x86_64-pc-windows-gnu toolchain)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 ---
@@ -79,8 +69,8 @@ Clone the repository and initialize the Meson build directory:
 git clone https://github.com/justinjoy/wirelog.git
 cd wirelog
 
-# Setup the build directory with the Differential Dataflow backend enabled
-meson setup builddir -Ddd=true
+# Setup the build directory
+meson setup builddir
 
 # Compile the project
 meson compile -C builddir

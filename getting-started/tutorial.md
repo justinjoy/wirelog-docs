@@ -157,7 +157,74 @@ bad(x) :- node(x), !edge(x, y).
 
 Negation is **stratified** -- a relation cannot recursively depend on its own negation.
 
-## 6. Aggregation
+## 6. Delta Queries
+
+Datalog programs often process changing data. In embedded systems, network policies, or access gateways, you may need to react to incremental updates — new users added to roles, new edges in a graph, new rules applied. Rather than recomputing from scratch, delta queries track only what changed.
+
+### Friend Suggestion Example
+
+Consider a social graph where you want to suggest friends-of-friends who are not already direct friends:
+
+```dl
+.decl person(x: string)
+.decl friend(x: string, y: string)
+.decl suggested(x: string, y: string)
+
+person("Alice").
+person("Bob").
+person("Carol").
+person("Dave").
+
+friend("Alice", "Bob").
+friend("Bob", "Carol").
+friend("Carol", "Dave").
+
+# Friend-of-a-friend who is not already a direct friend
+suggested(x, z) :-
+    friend(x, y),
+    friend(y, z),
+    x != z,
+    !friend(x, z).
+
+.output suggested
+```
+
+Save as `friends.dl` and run normally for the full result set:
+
+```bash
+wirelog-cli friends.dl
+```
+
+Output:
+
+```dl
+suggested("Alice", "Carol")
+suggested("Bob", "Dave")
+```
+
+To see only what **changed** when facts are added or removed, use the `--delta` flag (embedding API):
+
+```bash
+wirelog-cli friends.dl --delta suggested
+```
+
+After adding `friend("Alice", "Dave")`, the delta output shows only the newly derived tuple:
+
+```
++ suggested("Alice", "Dave")
+```
+
+After removing `friend("Bob", "Carol")`, the delta shows the retracted tuples:
+
+```
+- suggested("Alice", "Carol")
+- suggested("Alice", "Dave")
+- suggested("Bob", "Dave")
+```
+
+**Note**: The `--delta` flag outputs changed tuples only. Output relations must be declared with the `.output` directive. The `--delta` and `--watch` flags are available through the **embedded C API** (`wl_session_insert_incremental()`, `wl_session_set_delta_cb()`); see [Delta Queries Reference](../reference/delta-queries) for embedding API, performance tuning, and more examples.
+
+## 7. Aggregation
 
 Aggregate functions compute summary values: `count`, `sum`, `min`, `max`.
 
@@ -207,7 +274,7 @@ dist(3, 8)
 
 Node 3 gets distance 8 (via 1→2→3: 5+3) rather than 10 (direct 1→3) because `min` selects the smallest value.
 
-## 7. CSV Input
+## 8. CSV Input
 
 For larger datasets, load data from CSV files using the `.input` directive.
 
@@ -246,7 +313,7 @@ The `.output tc` directive means only `tc` results are printed. Without `.output
 | `int64` | 64-bit signed integer |
 | `string` | Text (interned internally) |
 
-## 8. String Values
+## 9. String Values
 
 wirelog supports string values via interning:
 
@@ -294,7 +361,7 @@ For large datasets, use multiple workers for parallel execution:
 wirelog-cli --workers 4 program.dl
 ```
 
-The `--workers` flag sets the number of Differential Dataflow worker threads. Results are identical regardless of worker count.
+The `--workers` flag sets the number of execution worker threads for the columnar backend. Results are identical regardless of worker count.
 
 ## Next Steps
 

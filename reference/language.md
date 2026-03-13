@@ -206,7 +206,7 @@ path(x, z) :- edge(x, y), path(y, z). .plan
 1. **Parse** -- Datalog source to AST
 2. **Optimize** -- Fusion, JPP (join reordering), SIP (semijoin pre-filtering)
 3. **Stratify** -- Tarjan's SCC algorithm, topological ordering
-4. **Translate** -- IR to Differential Dataflow operator graph
+4. **Translate** -- IR to columnar execution plan
 5. **Execute** -- Fixed-point iteration per stratum
 6. **Output** -- Print result tuples
 

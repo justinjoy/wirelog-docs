@@ -7,7 +7,7 @@ nav_order: 1
 
 **Embedded-to-Enterprise Datalog Engine**
 
-wirelog is a C11-based Datalog engine designed for embedded-to-enterprise deployments. The compiler frontend (parser, optimizer, plan generator) is written in C11, and the current execution backend uses [Differential Dataflow](https://github.com/TimelyDataflow/differential-dataflow) (Rust) via FFI. A future release will add a pure C11 execution backend using [nanoarrow](https://github.com/apache/arrow-nanoarrow), enabling lightweight embedded deployments without external dependencies.
+wirelog is a pure C11 Datalog engine designed for embedded-to-enterprise deployments. The compiler frontend (parser, optimizer, plan generator) and the execution backend (columnar storage with Apache Arrow via [nanoarrow](https://github.com/apache/arrow-nanoarrow)) are both implemented in C11, with no external dependencies.
 
 wirelog supports recursive queries, stratified negation, aggregation, and CSV data loading.
 
@@ -15,7 +15,7 @@ wirelog supports recursive queries, stratified negation, aggregation, and CSV da
 
 wirelog is a declarative logic programming engine that evaluates Datalog. It is built to bridge the gap between resource-constrained embedded environments and high-performance enterprise data processing.
 
-By separating the compilation frontend from the execution backend, wirelog can parse and optimize Datalog rules locally in a lightweight C11 core, while delegating the heavy lifting of execution to specialized backends like Differential Dataflow or Apache Arrow.
+wirelog parses, optimizes, and executes Datalog rules entirely within its C11 core, using a columnar Arrow-based execution engine that is efficient enough for both embedded devices and high-throughput enterprise pipelines.
 
 ### Why Datalog?
 
@@ -23,8 +23,8 @@ Datalog is a declarative logic programming language that is highly expressive fo
 
 ### Core Philosophy
 
-1. **Embedded First**: The core compiler is written in pure C11, making it trivial to embed wirelog into C/C++ applications or compile it to WebAssembly for the browser.
-2. **Pluggable Backends**: You construct your Datalog rules once, and wirelog targets the best execution engine for your environment, whether that's a locally vectorized backend or a distributed streaming engine.
+1. **Embedded First**: wirelog is written in pure C11 with no external dependencies, making it trivial to embed into C/C++ applications or compile to WebAssembly for the browser.
+2. **Columnar Execution**: The execution backend uses Apache Arrow columnar storage (via nanoarrow), giving wirelog high throughput on modern hardware without leaving the C11 ecosystem.
 3. **Advanced Features**: Beyond standard Datalog, wirelog natively supports recursive queries, stratified negation to reason about the absence of paths or data, and powerful aggregations.
 
 ## Documentation

@@ -16,8 +16,11 @@ wirelog-cli [options] <file.dl>
 
 | Option | Argument | Default | Description |
 |--------|----------|---------|-------------|
-| `--workers` | N | 1 | Number of worker threads (1-256) |
+| `--workers` | N | 1 | Number of execution worker threads (1-256) |
 | `--help`, `-h` | | | Print usage and exit |
+
+{: .note }
+The `--delta` and `--watch` flags are **not available in the CLI**. To use incremental updates and delta queries, use the embedded C API (`wl_session_insert_incremental()`, `wl_session_set_delta_cb()`). See [Delta Queries](../reference/delta-queries#embedding-api).
 
 ## Basic Usage
 
@@ -117,12 +120,11 @@ The CLI executes these stages in order:
 1. **Parse** -- source file to AST
 2. **Optimize** -- apply Fusion, JPP, SIP passes
 3. **Stratify** -- topological ordering via SCC detection
-4. **Generate Plan** -- IR to DD operator graph
-5. **Marshal** -- convert to FFI-safe format
-6. **Create Workers** -- instantiate DD worker threads
-7. **Load Facts** -- inline facts and CSV files
-8. **Execute** -- fixed-point computation
-9. **Output** -- print result tuples
+4. **Generate Plan** -- IR to columnar execution plan
+5. **Create Workers** -- instantiate execution worker threads
+6. **Load Facts** -- inline facts and CSV files
+7. **Execute** -- fixed-point computation
+8. **Output** -- print result tuples
 
 If any stage fails, execution stops with exit code 1.
 

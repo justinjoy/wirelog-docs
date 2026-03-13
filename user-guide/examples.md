@@ -300,81 +300,59 @@ Delta queries let wirelog track **what changed** between evaluation steps rather
 
 For full reference, see [Delta Queries](/reference/delta-queries).
 
-### Before/After Example
+### Degree Monitoring
 
-Consider a reachability program where we add a new edge and want to see only the newly derived facts:
+Monitor the out-degree of nodes as the graph changes. Aggregations produce deltas as pairs: the old aggregate value is retracted and the new value is inserted.
 
-**Initial state** — edges `(1,2)`, `(2,3)`, `(3,4)`:
+**degree-monitor.dl:**
 
 ```dl
 .decl edge(x: int32, y: int32)
-.decl reach(x: int32, y: int32)
+.decl out_degree(x: int32, deg: int32)
+.decl high_degree(x: int32)
 
 edge(1, 2).
+edge(1, 3).
 edge(2, 3).
-edge(3, 4).
 
-reach(x, y) :- edge(x, y).
-reach(x, z) :- reach(x, y), edge(y, z).
+out_degree(x, count(y)) :- edge(x, y).
+high_degree(x) :- out_degree(x, d), d >= 2.
 
-.output reach
+.output out_degree
+.output high_degree
 ```
 
-Output:
+**Snapshot output** (initial evaluation):
 
 ```dl
-reach(1, 2)
-reach(1, 3)
-reach(1, 4)
-reach(2, 3)
-reach(2, 4)
-reach(3, 4)
+out_degree(1, 2)
+out_degree(2, 1)
+high_degree(1)
 ```
 
-**After adding** `edge(4, 5)` — delta output shows only the newly derived tuples:
+**After adding** `edge(2, 4)` (node 2 gains a second neighbor):
 
-```dl
-+ reach(1, 5)
-+ reach(2, 5)
-+ reach(3, 5)
-+ reach(4, 5)
+```
+- out_degree(2, 1)
++ out_degree(2, 2)
++ high_degree(2)
 ```
 
-**After removing** `edge(2, 3)` — delta output shows the retracted tuples:
+**After removing** `edge(1, 2)` (node 1 drops below the threshold):
 
-```dl
-- reach(1, 3)
-- reach(1, 4)
-- reach(2, 3)
-- reach(2, 4)
 ```
+- out_degree(1, 2)
++ out_degree(1, 1)
+- high_degree(1)
+```
+
+Downstream rules that depend on `out_degree` automatically receive the correct delta, so `high_degree` updates without any additional program changes.
 
 ### Interpreting Delta Output
 
 | Prefix | Meaning |
 |--------|---------|
-| `+`    | Tuple was newly derived in this step |
-| `-`    | Tuple was retracted (no longer holds) |
-| *(none)* | Fact was already present and unchanged |
+| `+` | Tuple was newly derived in this step |
+| `-` | Tuple was retracted (no longer holds) |
 
-### CLI Commands for Delta Tracking
-
-Run a program and emit delta output for a relation:
-
-```bash
-wirelog-cli program.dl --delta reach
-```
-
-Watch a live data source and stream deltas as facts change:
-
-```bash
-wirelog-cli program.dl --delta reach --watch edges.csv
-```
-
-Pipe delta output to another tool:
-
-```bash
-wirelog-cli program.dl --delta reach | grep '^+' | awk '{print $2}'
-```
-
-See [Delta Queries](/reference/delta-queries) for the full directive syntax and advanced incremental computation patterns.
+Delta tracking is available through the **embedded C API** (`wl_session_set_delta_cb()`). See [Delta Queries](/reference/delta-queries) for the full embedding API and advanced incremental computation patterns.
