@@ -10,3 +10,4 @@ This section contains guides on how to use the `wirelog-cli` runner, and compreh
 
 - [Examples](examples): Advanced demonstration of rule logic
 - [CLI Usage](cli): Using the CLI runner to execute Datalog files
+- [Access Control Auditing](access-control-audit): Real-time RBAC auditing with delta queries and the embedding API
